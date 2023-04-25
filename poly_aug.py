@@ -23,7 +23,7 @@ import cv2
 
 import imgaug as ia
 from imgaug.augmentables.polys import Polygon, PolygonsOnImage
-from imgaug2labelme import *
+from utils import *
 
 def make_polys(json_file):
     with open(json_file, "r") as js:
