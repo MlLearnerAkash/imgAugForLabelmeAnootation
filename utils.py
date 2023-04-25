@@ -111,5 +111,5 @@ labelme_dict = {
 }
 
 # save the labelme-compatible dictionary to a file
-with open("labelme_data.json", "w") as f:
-    json.dump(labelme_dict, f, cls=NumpyEncoder)
+# with open("labelme_data.json", "w") as f:
+#     json.dump(labelme_dict, f, cls=NumpyEncoder)

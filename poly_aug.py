@@ -6,8 +6,8 @@ import json
 from labelme import utils
 import os
 import numpy as np
-
-
+import glob
+import base64
 import json
 from imgaug.augmentables.polys import Polygon, PolygonsOnImage
 
@@ -41,9 +41,9 @@ def make_polys(json_file):
     return(polys_oi)
 
 
-quokka_img = cv2.imread("/home/moka/Akash/Seg-1001-1700_03042023/1003.jpg")
+# quokka_img = cv2.imread("/home/moka/Akash/Seg-1001-1700_03042023/1003.jpg")
 
-polys_oi = make_polys("/home/moka/Akash/Seg-1001-1700_03042023/1003.json")
+# polys_oi = make_polys("/home/moka/Akash/Seg-1001-1700_03042023/1003.json")
 
 # print(polys_oi)
 # # This is just to plot it ...
@@ -82,7 +82,7 @@ def POI2labelmejson(img_name,poly, json_name) -> None:
         "lineColor": [0,225,0,128],
         "fillColor": [225,0,0,128],
         "imagePath": f"{img_name}",
-        "imageData": None,
+        "imageData": base64.b64encode(open(img_name, "rb").read()).decode('utf-8'),
         "imageHeight": 2048,
         "imageWidth": 2048
     }
@@ -93,14 +93,8 @@ def POI2labelmejson(img_name,poly, json_name) -> None:
     return None
 
 
-my_augmenter = iaa.Sequential([
-    iaa.GaussianBlur((0.1, 5)),
-    iaa.Fliplr(0.5),
-    iaa.Flipud(0.5),
-    iaa.Rotate((-45,45))])
 
-img_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.jpg"
-json_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.json"
+
 
 def augmentation(img_path, json_path, my_augmenter,num_aug, aug_img_path):
     quokka_img = cv2.imread(img_path)
@@ -118,16 +112,13 @@ def augmentation(img_path, json_path, my_augmenter,num_aug, aug_img_path):
     augmented_list = [my_augmenter(image = quokka_img, polygons = polys_oi) for _ in range(num_aug)]
 
     # Now we just make the overlay for viz purposes
-    overlaid_images = [img for img, _ in augmented_list]
+    # overlaid_images = [img for img, _ in augmented_list]
 
-    cv2.imwrite("overlaid_image.png", cv2.vconcat(overlaid_images))
+    # cv2.imwrite("overlaid_image.png", cv2.vconcat(overlaid_images))
     i =0
     for img, poly in augmented_list:
-        print("<<<<<<<<<<<<",aug_img_path+f"{img_path.split('/')[-1].split('.')[0]}_aug_{i}.png")
         cv2.imwrite(aug_img_path+f"{img_path.split('/')[-1].split('.')[0]}_aug_{i}.png", img)
 
-        print(">>>>>>", poly.polygons)
-        print("\n\n\n")
         POI2labelmejson(img_name=aug_img_path+f"{img_path.split('/')[-1].split('.')[0]}_aug_{i}.png",
                         poly=poly, json_name=aug_img_path+ f"{img_path.split('/')[-1].split('.')[0]}_aug_{i}" )
         i+=1
@@ -135,4 +126,23 @@ def augmentation(img_path, json_path, my_augmenter,num_aug, aug_img_path):
 
 
 if __name__ == "__main__":
-    augmentation(img_path, json_path, my_augmenter, 2, "./")
+
+    my_augmenter = iaa.Sequential([
+    iaa.GaussianBlur((0.1, 5)),
+    iaa.Fliplr(0.5),
+    iaa.Flipud(0.5),
+    iaa.Rotate((-45,45))])
+
+
+    NUM_AUG =10
+    img_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.jpg"
+    json_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.json"
+
+    img_files = sorted(glob.glob("/home/moka/Akash/Seg-1001-1700_03042023/*.jpg"))[:2]
+    json_files = sorted(glob.glob("/home/moka/Akash/Seg-1001-1700_03042023/*.json"))[:2]
+
+    
+    for img_file, json_file in zip(sorted(img_files), sorted(json_files)):
+        print(">>>img_file: ", img_file)
+        print(">>>json_file: ", json_file)
+        augmentation(img_file, json_file, my_augmenter, NUM_AUG, "/home/moka/Akash/aug_data/augmented/")
