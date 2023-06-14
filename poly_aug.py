@@ -9,6 +9,7 @@ import numpy as np
 import glob
 import base64
 import json
+import time
 from imgaug.augmentables.polys import Polygon, PolygonsOnImage
 
 from imgaug import augmenters as iaa
@@ -131,18 +132,40 @@ if __name__ == "__main__":
     iaa.GaussianBlur((0.1, 5)),
     iaa.Fliplr(0.5),
     iaa.Flipud(0.5),
-    iaa.Rotate((-45,45))])
+    # iaa.Rotate((-15,15)),
+    iaa.Affine(rotate=(-15, 15), fit_output = True),#, fit_output = True
+    # iaa.AdditiveGaussianNoise(scale=(0, 0.05*255), per_channel=False), #f
+    # iaa.CoarseDropout(0.1, size_percent=0.5),  #f
+    # iaa.BlendAlpha((0.0, 1.0),iaa.Affine(rotate=(-25, 25)),per_channel=0.5), #f
+    # iaa.MotionBlur(k=(5,15), angle=[-20, 20]), #f
+    iaa.MultiplyAndAddToBrightness( add=(-25, 10)), ##? #mul=(0.5, 1.0), #f
+    # iaa.SigmoidContrast(gain=(10, 30), cutoff=(0.0, 0.2)),##?
+    # iaa.LinearContrast((0.4, 1.0)),
+    # iaa.AllChannelsCLAHE(),
+    iaa.Affine(shear=(-45, 25), fit_output = True),
+    # iaa.AveragePooling([2, 8],keep_size=False),
+    # iaa.FastSnowyLandscape(lightness_threshold=[128, 200],lightness_multiplier=(0.5, 1.0))
+    ])
 
 
     NUM_AUG =10
-    img_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.jpg"
-    json_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.json"
+    # img_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.jpg"
+    # json_path = "/home/moka/Akash/Seg-1001-1700_03042023/1003.json"
 
-    img_files = sorted(glob.glob("/home/moka/Akash/Seg-1001-1700_03042023/*.jpg"))[:2]
-    json_files = sorted(glob.glob("/home/moka/Akash/Seg-1001-1700_03042023/*.json"))[:2]
+    # img_files = sorted(glob.glob("/media/depak/BinariHDD1/share/22-4-2023/*.jpg"))[1000:]
+    # json_files = sorted(glob.glob("/media/depak/BinariHDD1/share/22-4-2023/*.json"))[1000:]
+
+    img_files = sorted(glob.glob("/media/depak/HDD/shared/data_29_05_2023/*.jpg"))[1000:]
+    json_files = sorted(glob.glob("/media/depak/HDD/shared/data_29_05_2023/*.json"))[1000:]
 
     
     for img_file, json_file in zip(sorted(img_files), sorted(json_files)):
-        print(">>>img_file: ", img_file)
-        print(">>>json_file: ", json_file)
-        augmentation(img_file, json_file, my_augmenter, NUM_AUG, "/home/moka/Akash/aug_data/augmented/")
+        start_time = time.time()
+        print("[Manna log: img_file]: ", img_file)
+        print("[Manna log: json_file]: ", json_file)
+        augmentation(img_file, json_file, my_augmenter, NUM_AUG, "/media/depak/HDD/shared/aug_data_29_05_23_img4050/")
+        end_time = time.time()
+        print("Elapsed time: {:.2f} seconds".format(end_time - start_time))
+        print("\n\n")
+
+
